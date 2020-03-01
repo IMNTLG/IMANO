@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>KOU イメージ</title>
+    <link rel="icon" href="images/jds.png">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+</head>
+<script type="text/javascript">
+    // -------------------------post函数-----------------------------------------------------------------------------------------------
+
+    function postRegist(argUserName, argMsgBox, argPostTimer) {
+        //创建一个XMLHttpRequest 对象
+        var xhr = new XMLHttpRequest();
+        //准备发送请求的数据：url
+        var url = "/bbt/msg_post";
+        //使用HTTP POST请求与服务器交互数据
+        xhr.open("POST", url, true);
+        //设置发送数据的请求格式
+        xhr.setRequestHeader('content-type', 'application/json');
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState == 3) {
+                // loading();
+            } else if (xhr.readyState == 4) {
+                // closeLoading();
+                //根据服务器的响应内容格式处理响应结果
+                if (xhr.getResponseHeader('content-type') === 'application/json') {
+                    console.log(xhr.responseText);
+                    var resultJSON = JSON.parse(xhr.responseText);
+                    if (resultJSON.errcode === 0) {
+                        alert("留言成功!");
+                        reload();
+                    }
+                } else {
+                    console.log(xhr.responseText);
+                    alert("服务器返回结果格式不是JSON");
+                }
+            }
+        }
+
+        var sendData = {
+            "username": argUserName,
+            "msgBox": argMsgBox,
+            "postTimer": argPostTimer
+        };
+        //将用户输入值序列化成字符串
+        console.log(JSON.stringify(sendData));
+        xhr.send(JSON.stringify(sendData));
+
+        function postmsg() {
+            var username1 = document.getElementById("userName").value;
+            var notes1 = document.getElementById("msgBox").value;
+            var datatime1 = document.getElementById("postTimer").value;
+            console.log(userName, msgBox, postTimer)
+
+        }
+    }
+    Date.prototype.Format = function(fmt) {
+        var o = {
+            "M+": this.getMonth() + 1, //月份 
+            "d+": this.getDate(), //日 
+            "h+": this.getHours(), //小时 
+            "m+": this.getMinutes(), //分 
+            "s+": this.getSeconds() //秒 
+        };
+        if (/(y+)/.test(fmt)) { //根据y的长度来截取年
+            fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+        }
+        for (var k in o) {
+            if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+        }
+        return fmt;
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------------------------
+    // ------------------------get函数--------------------------------------------------------------------------------------------------------
+
+    // 获取ul的id
+    var listElement = document.getElementById('list');
+    // 发送ajax请求获取列表数据呈现在也页面
+    // ====================================
+    var xhr = new XMLHttpRequest();
+    //准备发送请求的数据：url
+    var url = "/bbt/msg_get";
+    //使用HTTP POST请求与服务器交互数据
+    xhr.open("GET", url, true);
+    // 敲回车等响应
+    xhr.send();
+
+    // 接收请求
+    xhr.onreadystatechange = function() {
+        //判断请求题是不是我们想要的数据
+        if (this.readyState !== 4) return;
+        // 获取传过来的json数据
+        var data = JSON.parse(this.responseText);
+        console.log(data)
+            //data ==> 数据
+        var oLi = document.createElement("li");
+        var oDate = new Date();
+    }
+
+    /*-------------------------- +
+      获取id, class, tagName
+     +-------------------------- */
+    var get = {
+        byId: function(id) {
+            return typeof id === "string" ? document.getElementById(id) : id
+        },
+        byClass: function(sClass, oParent) {
+            var aClass = [];
+            var reClass = new RegExp("(^| )" + sClass + "( |$)");
+            var aElem = this.byTagName("*", oParent);
+            for (var i = 0; i < aElem.length; i++) reClass.test(aElem[i].className) && aClass.push(aElem[i]);
+            return aClass
+        },
+        byTagName: function(elem, obj) {
+            return (obj || document).getElementsByTagName(elem)
+        }
+    };
+    /*-------------------------- +
+      事件绑定, 删除
+     +-------------------------- */
+    var EventUtil = {
+        addHandler: function(oElement, sEvent, fnHandler) {
+            oElement.addEventListener ? oElement.addEventListener(sEvent, fnHandler, false) : (oElement["_" + sEvent + fnHandler] = fnHandler, oElement[sEvent + fnHandler] = function() {
+                oElement["_" + sEvent + fnHandler]()
+            }, oElement.attachEvent("on" + sEvent, oElement[sEvent + fnHandler]))
+        },
+        removeHandler: function(oElement, sEvent, fnHandler) {
+            oElement.removeEventListener ? oElement.removeEventListener(sEvent, fnHandler, false) : oElement.detachEvent("on" + sEvent, oElement[sEvent + fnHandler])
+        },
+        addLoadHandler: function(fnHandler) {
+            this.addHandler(window, "load", fnHandler)
+        }
+    };
+    /*-------------------------- +
+      设置css样式
+      读取css样式
+     +-------------------------- */
+    function css(obj, attr, value) {
+        switch (arguments.length) {
+            case 2:
+                if (typeof arguments[1] == "object") {
+                    for (var i in attr) i == "opacity" ? (obj.style["filter"] = "alpha(opacity=" + attr[i] + ")", obj.style[i] = attr[i] / 100) : obj.style[i] = attr[i];
+                } else {
+                    return obj.currentStyle ? obj.currentStyle[attr] : getComputedStyle(obj, null)[attr]
+                }
+                break;
+            case 3:
+                attr == "opacity" ? (obj.style["filter"] = "alpha(opacity=" + value + ")", obj.style[attr] = value / 100) : obj.style[attr] = value;
+                break;
+        }
+    };
+
+    EventUtil.addLoadHandler(function() {
+        var oimgBox = get.byId("imgBox");
+        var jusername = get.byId("userName");
+        var omsgBox = get.byId("msgBox");
+        var oSendBtn = get.byId("sendBtn");
+        var oMaxNum = get.byClass("maxNum")[0];
+        var oCountTxt = get.byClass("countTxt")[0];
+        var oList = get.byClass("list")[0];
+        var oUl = get.byTagName("ul", oList)[0];
+        var aLi = get.byTagName("li", oList);
+        var jnotes = get.byClass("notes", oimgBox);
+        var aImg = get.byTagName("img", get.byId("face"));
+        var bSend = false;
+        var timer = null;
+        var oTmp = "";
+        var i = 0;
+        var maxNum = 300;
+        var oDate = new Date();
+        var postTimer = format(oDate.getMonth() + 1) + "\u6708" + format(oDate.getDate()) + "\u65e5 " + format(oDate.getHours()) + ":" + format(oDate.getMinutes())
+            //禁止表单提交
+        EventUtil.addHandler(get.byTagName("form", oimgBox)[0], "submit", function() {
+            return false
+        });
+
+        //为留言按钮绑定发送事件
+        EventUtil.addHandler(oSendBtn, "click", fnSend);
+
+
+
+        //发送留言函数
+        function fnSend() {
+            var reg = /^\s*$/g;
+            if (reg.test(jusername.value)) {
+                alert("请填写你的昵称");
+                jusername.focus()
+            } else if (reg.test(omsgBox.value)) {
+                alert("\u968f\u4fbf\u8bf4\u70b9\u4ec0\u4e48\u5427\uff01");
+                omsgBox.focus()
+            } else {
+                var oLi = document.createElement("li");
+                var oDate = new Date();
+                oLi.innerHTML = "<div class=\"userPic\"><img  src=\"" + get.byClass("current", get.byId("face"))[0].src + "\"></div>\
+							 <div class=\"content\">\
+							 	<div class=\"userName\"><a href=\"javascript:;\">" + jusername.value + "</a>:</div>\
+								<div class=\"msgInfo\">" + omsgBox.value.replace(/<[^>]*>|&nbsp;/ig, "") + "</div>\
+								<div class=\"times\"><span>" + format(oDate.getMonth() + 1) + "\u6708" + format(oDate.getDate()) + "\u65e5 " + format(oDate.getHours()) + ":" + format(oDate.getMinutes()) + "</span><a class=\"del\" href=\"javascript:;\">\u5220\u9664</a></div>\
+							 </div>";
+                //插入元素
+                aLi.length ? oUl.insertBefore(oLi, aLi[0]) : oUl.appendChild(oLi);
+
+                //重置表单
+                get.byTagName("form", oimgBox)[0].reset();
+                for (i = 0; i < aImg.length; i++) aImg[i].className = "";
+                aImg[0].className = "current";
+
+                //将元素高度保存
+                var iHeight = oLi.clientHeight - parseFloat(css(oLi, "paddingTop")) - parseFloat(css(oLi, "paddingBottom"));
+                var alpah = count = 0;
+                css(oLi, {
+                    "opacity": "0",
+                    "height": "0"
+                });
+                timer = setInterval(function() {
+                    css(oLi, {
+                        "display": "block",
+                        "opacity": "0",
+                        "height": (count += 8) + "px"
+                    });
+                    if (count > iHeight) {
+                        clearInterval(timer);
+                        css(oLi, "height", iHeight + "px");
+                        timer = setInterval(function() {
+                            css(oLi, "opacity", (alpah += 10));
+                            alpah > 100 && (clearInterval(timer), css(oLi, "opacity", 100))
+                        }, 30)
+                    }
+                }, 30);
+                //调用鼠标划过/离开样式
+                liHover();
+                //调用删除函数
+                delLi()
+            }
+        };
+
+        //li鼠标划过/离开处理函数
+        function liHover() {
+            for (i = 0; i < aLi.length; i++) {
+                //li鼠标划过样式
+                EventUtil.addHandler(aLi[i], "mouseover", function(event) {
+                    this.className = "hover";
+                    oTmp = get.byClass("times", this)[0];
+                    var aA = get.byTagName("a", oTmp);
+                    if (!aA.length) {
+                        var oA = document.createElement("a");
+                        oA.innerHTML = "删除";
+                        oA.className = "del";
+                        oA.href = "javascript:;";
+                        oTmp.appendChild(oA)
+                    } else {
+                        aA[0].style.display = "block";
+                    }
+                });
+
+                //li鼠标离开样式
+                EventUtil.addHandler(aLi[i], "mouseout", function() {
+                    this.className = "";
+                    var oA = get.byTagName("a", get.byClass("times", this)[0])[0];
+                    oA.style.display = "none"
+                })
+            }
+        }
+        liHover();
+
+        //删除功能
+        function delLi() {
+            var aA = get.byClass("del", oUl);
+
+            for (i = 0; i < aA.length; i++) {
+                aA[i].onclick = function() {
+                    var oParent = this.parentNode.parentNode.parentNode;
+                    var alpha = 100;
+                    var iHeight = oParent.offsetHeight;
+                    timer = setInterval(function() {
+                        css(oParent, "opacity", (alpha -= 10));
+                        if (alpha < 0) {
+                            clearInterval(timer);
+                            timer = setInterval(function() {
+                                iHeight -= 10;
+                                iHeight < 0 && (iHeight = 0);
+                                css(oParent, "height", iHeight + "px");
+                                iHeight == 0 && (clearInterval(timer), oUl.removeChild(oParent))
+                            }, 30)
+                        }
+                    }, 30);
+                    this.onclick = null
+                }
+            }
+        }
+        delLi();
+
+
+        for (i = 0; i < jnotes.length; i++) {
+            EventUtil.addHandler(jnotes[i], "focus", function() {
+                this.className = "active"
+            });
+            EventUtil.addHandler(jnotes[i], "blur", function() {
+                this.className = ""
+            })
+        }
+
+        function format(str) {
+            return str.toString().replace(/^(\d)$/, "0$1")
+        }
+
+        for (i = 0; i < aImg.length; i++) {
+            aImg[i].onmouseover = function() {
+                this.className += " hover"
+            };
+            aImg[i].onmouseout = function() {
+                this.className = this.className.replace(/\s?hover/, "")
+            };
+            aImg[i].onclick = function() {
+                for (i = 0; i < aImg.length; i++) aImg[i].className = "";
+                this.className = "current"
+            }
+        }
+    });
+</script>
+
+
+<body>
+    <header>
+
+        <div class="container">
+            <img class="logo" src="images/jds1.png" alt="哎呀加载失败了呢" width="80px" height="80px">
+            <h1>KOUイメージ!</h1>
+            <h2>~日本語で楽しくおしゃべろう~</h2>
+        </div>
+    </header>
+    <div id="imgBox">
+        <form>
+            <h2>欢迎大家留言呀！</h2>
+            <div>
+                <input id="userName" class="notes" value="" placeholder="输入你的昵称" />
+                <p id="face"><img src="images/red.jpg" class="current" /><img src="images/yellow.jpg" /><img src="images/blue.jpg" /><img src="images/black.jpg" /></p>
+            </div>
+            <div><textarea id="msgBox" class="notes" placeholder="在这里输入你的留言"></textarea></div>
+            <div class="tr">
+                <p>
+                    <input id="sendBtn" type="button" value="留  言" />
+                </p>
+            </div>
+        </form>
+        <div class="list">
+            <h3><span>大家的留言</span></h3>
+            <ul>
+                <li>
+                    <div class="userPic"><img src="images/black.jpg" /></div>
+                    <div class="content">
+                        <div class="userName"><a href="javascript:;">杲d区</a>:</div>
+                        <div class="msgInfo">我吐了，JavaScript太难了orz</div>
+                        <div class="times"><span>3月1日 21:01</span><a class="del" href="javascript:;">删除</a></div>
+                    </div>
+                </li>
+                <li>
+                    <div class="userPic"><img src="images/jds.png" /></div>
+                    <div class="content">
+                        <div class="userName"><a href="javascript:;">杲杲杲糕</a>:</div>
+                        <div class="msgInfo">欢迎留言嗷！</div>
+                        <div class="times"><span>02月21日 21:03</span><a class="del" href="javascript:;">删除</a></div>
+                    </div>
+                </li>
+
+
+            </ul>
+        </div>
+    </div>
+
+</body>
+
+</html>
